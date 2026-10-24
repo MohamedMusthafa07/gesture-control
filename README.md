@@ -1,187 +1,119 @@
-# Gesture Control Presenter 🎮🖐️
+# Gesture Control Presenter
 
-I built this project to control Google Slides presentations with hand gestures, using my laptop webcam, Computer Vision and AI.
+A small Python project that lets me change Google Slides with hand gestures. It uses the laptop webcam, so there is no clicker or other hardware.
 
----
+## About this project
 
-# 📌 Project Overview
+I attended an online AI bootcamp where hand tracking was covered. After that I wanted to try it on something useful, so I built this myself to control my slides while presenting. The gesture rules, the cooldown logic and the speed fixes came from testing it on my own laptop.
 
-Gesture Control Presenter tracks my hand in real time using **MediaPipe**, counts the fingers I hold up with **OpenCV**, and turns each gesture into a keyboard shortcut using **PyAutoGUI**. No clicker or extra hardware is needed, only a webcam.
+## Why I made it
 
----
+When presenting, I either have to stay next to the laptop or hold a clicker to change slides. I wanted to just show a hand sign to the camera instead.
 
-# ❓ Problem Statement
+## Gestures
 
-While presenting, I have to stay near the laptop or hold a clicker to change slides. I wanted a hands-free way to move through a presentation, so I built a system that recognises simple hand gestures and controls the slideshow for me.
+| Gesture | Action |
+| --- | --- |
+| Open palm (4 fingers) | Next slide |
+| Three fingers | Previous slide |
+| Two fingers | Start slideshow |
+| Fist | Exit slideshow |
 
----
+## Tech used
 
-# 🚀 Features
+- Python
+- OpenCV (webcam capture and drawing on the frame)
+- MediaPipe (hand landmark detection)
+- PyAutoGUI (sends the keyboard shortcuts)
 
-* Control Google Slides using gestures
-* Real-time hand tracking using AI
-* Works directly from the laptop webcam
-* No additional hardware required
-* Works on Windows and macOS
+## How it works
 
----
+1. OpenCV reads frames from the webcam.
+2. MediaPipe finds the 21 landmarks of the hand in each frame.
+3. For the index, middle, ring and pinky fingers, I check whether the fingertip is above its middle joint. If it is, that finger counts as up.
+4. The number of fingers up is matched to an action.
+5. PyAutoGUI sends the matching key press to the active window.
 
-# 🧠 Gesture Controls
+To avoid wrong triggers, a gesture has to stay the same for a few frames before it counts, and there is a cooldown after every action so one gesture does not fire again and again.
 
-| Gesture          | Action          |
-| ---------------- | --------------- |
-| ✋ Open Palm      | Next Slide      |
-| 🤟 Three Fingers | Previous Slide  |
-| ✌️ Two Fingers   | Start Slideshow |
-| ✊ Fist           | Exit Slideshow  |
-
----
-
-# 🛠️ Technologies Used
-
-* Python
-* OpenCV
-* MediaPipe
-* PyAutoGUI
-
----
-
-# 📦 Installation
-
-## Step 1 — Clone the Project
+## Setup
 
 ```bash
 git clone https://github.com/MohamedMusthafa07/gesture-control
 cd gesture-control
-```
-
-## Step 2 — Install Dependencies
-
-```bash
 pip install -r requirements.txt
-```
-
-## Step 3 — Download the Hand Landmarker Model
-
-```bash
 python setup_models.py
 ```
 
----
+`setup_models.py` downloads the MediaPipe hand landmarker model into the `models` folder.
 
-# ▶️ Run the App
+## Run
 
 ```bash
 python main.py
 ```
 
-Press **q** in the webcam window to quit.
+Press `q` in the webcam window to quit.
 
----
+## How to use
 
-# 💻 Platform Notes
+1. Open your slides in Google Slides in Chrome.
+2. Run `python main.py`.
+3. Click the Chrome window so it has keyboard focus. The key presses go to whichever window is active.
+4. Hold your hand upright in front of the webcam, palm facing the camera, and use the gestures.
 
-**Windows:** the "Two Fingers" gesture sends `Ctrl + F5` (Google Slides present shortcut). No extra permissions are needed.
+## Platform notes
 
-**macOS:** the "Two Fingers" gesture sends `Command + Enter`.
+- **Windows:** two fingers sends `Ctrl + F5`. No extra permissions needed.
+- **macOS:** two fingers sends `Command + Enter`. Allow Accessibility, Input Monitoring and Camera for your terminal or editor in System Settings, under Privacy & Security.
 
-## macOS Permission Setup
+## Tips
 
-Go to **System Settings → Privacy & Security** and enable **Accessibility**, **Input Monitoring** and **Camera** for Terminal, VS Code or PyCharm. Without these permissions, the app cannot control Google Slides.
+- Use good lighting and keep your hand clearly visible.
+- A plain background works better than a cluttered one.
+- Stay at a moderate distance from the camera.
+- The finger count only works when the hand is upright. A tilted or sideways hand gives wrong counts.
+- If it feels slow, plug in the charger and close extra browser tabs. The window shows the current FPS.
+- If gestures trigger too easily, increase `STABLE_FRAMES` in `main.py`.
 
----
+## Project structure
 
-# 🎯 How to Use
-
-1. Open Google Slides in Chrome
-2. Run the Python application
-3. Click the Chrome window so it has keyboard focus
-4. Show gestures in front of the webcam
-5. Control slides hands-free
-
----
-
-# 📂 Project Structure
-
-```bash
+```
 gesture-control/
-│
-├── .gitignore
 ├── main.py
-├── README.md
-├── requirements.txt
 ├── setup_models.py
+├── requirements.txt
+├── README.md
+├── LICENSE
+├── .gitignore
 └── models/
-    └── hand_landmarker.task
+    └── hand_landmarker.task   (downloaded by setup_models.py)
 ```
 
----
+## What I learned
 
-# 🧩 How It Works
+- Reading and processing webcam frames in real time with OpenCV
+- Getting hand landmarks from MediaPipe and turning them into simple gesture rules
+- Why running detection in video mode is much faster than detecting from scratch every frame
+- Reading the camera in a separate thread to reduce lag
+- Using cooldowns and frame checks so one gesture triggers one action
 
-1. I capture the webcam feed using OpenCV
-2. MediaPipe detects the hand landmarks
-3. I check which fingertips are above their joints to count raised fingers
-4. Each finger count is mapped to a keyboard shortcut
-5. PyAutoGUI sends that shortcut to Google Slides
+## Future improvements
 
----
+These are things I noticed while using it that would make it better in a real presentation.
 
-# 📚 What I Learned
+- **Activate and lock gesture.** Right now any hand that enters the camera view can trigger a slide change, even when I am just waving my hands while talking. I want a gesture that locks and unlocks the controls.
+- **Swipe left and right.** Swiping feels more natural than holding up fingers, and it avoids accidental triggers while the hand is opening or closing.
+- **Settings file.** Keep the gesture mapping, cooldown and camera number in a config file, so these can be changed without editing the code.
+- **Other presentation software.** Support PowerPoint and PDF viewers, which use different shortcuts.
 
-* Real-time webcam processing with OpenCV
-* Hand landmark detection using MediaPipe
-* Turning landmark positions into simple gesture rules
-* Automating keyboard control with Python
-* Handling cooldowns so one gesture doesn't trigger repeatedly
-* Making code work across Windows and macOS
+## Author
 
----
+A. Mohamed Musthafa
 
-# 🔮 Future Improvements
+- GitHub: [MohamedMusthafa07](https://github.com/MohamedMusthafa07)
+- LinkedIn: [mohamedmusthafa07](https://www.linkedin.com/in/mohamedmusthafa07)
 
-* Swipe gesture recognition
-* Gesture-based laser pointer
-* Volume control
-* Zoom gestures
-* Custom gesture training
-* Multi-hand support
+## License
 
----
-
-# ⚠️ Notes
-
-* Make sure the lighting is good
-* Keep your hand visible to the webcam
-* Avoid cluttered backgrounds for better detection
-* Works best at a moderate distance from the camera
-
----
-
-# 🔗 Useful Links
-
-* [MediaPipe Hand Landmarker Live Demo](https://google-ai-edge.github.io/mediapipe-samples-web/#/vision/hand_landmarker)
-* [Google AI MediaPipe Guide](https://ai.google.dev/edge/mediapipe/solutions/guide)
-
----
-
-# 🎓 Internship Information
-
-* **Organization:** CodeAlpha
-* **Project:** Gesture Control Presenter
-
----
-
-# 👨‍💻 Author
-
-**A. Mohamed Musthafa**
-
-* GitHub: [MohamedMusthafa07](https://github.com/MohamedMusthafa07)
-* LinkedIn: [mohamedmusthafa07](https://www.linkedin.com/in/mohamedmusthafa07)
-
----
-
-# 📄 License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
+MIT License. See the `LICENSE` file.
